@@ -1,4 +1,4 @@
-#  É necessário executar o seguinte comando no terminal do VS Code para conseguir executar o programa:
+#  É necessário executar o seguinte comando no terminal para conseguir executar o programa:
 #  pip install pygame
 #  Para executar o programa é necessário além da instalação da biblioteca, inserior o seguindo comando no terminal:
 #  python main.py
