@@ -30,11 +30,11 @@ snake_speed = 7
 
 # Carregamento de imagens
 try:
-    fundo = pygame.image.load("fundo_cobra.png").convert()
-    cabeça_cobra = pygame.image.load("cabeça_cobra.png").convert_alpha()
-    corpo_cobra = pygame.image.load("corpo_cobra.png").convert_alpha()
-    rabo_cobra = pygame.image.load("rabo_cobra.png").convert_alpha()
-    fruta_img = pygame.image.load("fruta.png").convert_alpha()
+    fundo = pygame.image.load("img/fundo_cobra.png").convert()
+    cabeça_cobra = pygame.image.load("img/cabeça_cobra.png").convert_alpha()
+    corpo_cobra = pygame.image.load("img/corpo_cobra.png").convert_alpha()
+    rabo_cobra = pygame.image.load("img/rabo_cobra.png").convert_alpha()
+    fruta_img = pygame.image.load("img/fruta.png").convert_alpha()
 except pygame.error as e:
     print(f"Erro ao carregar imagens: {e}")
     pygame.quit()
