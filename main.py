@@ -18,20 +18,19 @@ pygame.display.set_caption('Snake Game - Remastered')
 white = (255, 255, 255)
 black = (0, 0, 0)
 red = (255, 0, 0)
-dark_green = (0, 128, 0)
 
 # Tamanho do bloco da cobra e velocidade
-snake_block = 50
+snake_block = 60
 initial_snake_length = 3  # Cabeça + 1 Corpo + Rabo
-snake_speed = 7
+snake_speed = 10
 
 # Carregamento de imagens
 try:
     fundo = pygame.image.load("img/fundo_cobra.png").convert()
-    cabeça_cobra = pygame.image.load("img/cabeca_cobra.png").convert_alpha()
+    cabeca_cobra = pygame.image.load("img/cabeca_cobra.png").convert_alpha()
     corpo_cobra = pygame.image.load("img/corpo_cobra.png").convert_alpha()
     rabo_cobra = pygame.image.load("img/rabo_cobra.png").convert_alpha()
-    corpo_curvado = pygame.image.load("img/curva_cobra.png").convert_alpha()
+    curva_cobra = pygame.image.load("img/curva_cobra.png").convert_alpha()
     fruta_img = pygame.image.load("img/fruta.png").convert_alpha()
 except pygame.error as e:
     print(f"Erro ao carregar imagens: {e}")
@@ -40,82 +39,71 @@ except pygame.error as e:
 
 # Redimensionamento das imagens
 fundo = pygame.transform.scale(fundo, (dis_width, dis_height))
-cabeça_cobra = pygame.transform.scale(cabeça_cobra, (snake_block, snake_block))
+cabeca_cobra = pygame.transform.scale(cabeca_cobra, (snake_block, snake_block))
 corpo_cobra = pygame.transform.scale(corpo_cobra, (snake_block, snake_block))
 rabo_cobra = pygame.transform.scale(rabo_cobra, (snake_block, snake_block))
-corpo_curvado = pygame.transform.scale(corpo_curvado, (snake_block, snake_block))
+curva_cobra = pygame.transform.scale(curva_cobra, (snake_block, snake_block))
 fruta_img = pygame.transform.scale(fruta_img, (snake_block, snake_block))
 
-# Função para desenhar a cobra
+# Função para desenhar a cobra com rotação correta
+# Função para desenhar a cobra com rotação correta
+# Função para desenhar a cobra com rotação correta
 def our_snake(snake_list, direction):
     for i, pos in enumerate(snake_list):
         if i == len(snake_list) - 1:  # Cabeça
-            if i > 0:
-                direction = get_segment_direction(snake_list[i - 1], pos)
-            else:
-                direction = 0  # Padrão
-            dis.blit(rotate_image(cabeça_cobra, direction), pos)
-        
+            dis.blit(pygame.transform.rotate(cabeca_cobra, direction), pos)
         elif i == 0:  # Rabo
-            next_segment = snake_list[1]
-            rabo_dir = get_segment_direction(pos, next_segment)
-            dis.blit(rotate_image(rabo_cobra, rabo_dir), pos)
-        
-        else:  # Corpo
-            prev_segment = snake_list[i - 1]
-            next_segment = snake_list[i + 1]
-
-            if prev_segment[0] != next_segment[0] and prev_segment[1] != next_segment[1]:
-                prev_vector = (prev_segment[0] - pos[0], prev_segment[1] - pos[1])
-                current_vector = (pos[0] - next_segment[0], pos[1] - next_segment[1])
-                curva_dir = get_curva_direction(prev_vector, current_vector)
-                dis.blit(pygame.transform.rotate(corpo_curvado, curva_dir), pos)
+            next_pos = snake_list[i + 1]
+            if next_pos[0] > pos[0]:
+                angle = 0  # Direção para a direita
+            elif next_pos[0] < pos[0]:
+                angle = 180  # Direção para a esquerda
+            elif next_pos[1] > pos[1]:
+                angle = 270  # Direção para baixo
             else:
-                # Movimento na vertical
-                if prev_segment[0] == next_segment[0]:
-                    corpo_rotacionado = pygame.transform.rotate(corpo_cobra, 90)
-                else:
-                    corpo_rotacionado = corpo_cobra
-                dis.blit(corpo_rotacionado, pos)
+                angle = 90  # Direção para cima
+            dis.blit(pygame.transform.rotate(rabo_cobra, angle), pos)
+        else:  # Corpo
+            prev_pos = snake_list[i - 1]
+            next_pos = snake_list[i + 1]
+
+            # Verifica se o corpo faz uma curva
+            if prev_pos[0] != next_pos[0] and prev_pos[1] != next_pos[1]:  # Condição de curva
+                # A cobra está fazendo uma curva, usa o sprite da curva
+                if  prev_pos[1] < pos[1] and next_pos[1] < pos[1]:  # Curva para a direita e para baixo
+                    angle = 0
+                elif prev_pos[0] < pos[0] and next_pos[1] > pos[1]:  # Curva para baixo e para a direita
+                    angle = 0
+                elif prev_pos[1] < pos[1] and next_pos[0] > pos[0]:  # Curva para cima e para a direita
+                    angle = 180
+                elif prev_pos[0] > pos[0] and next_pos[1] > pos[1]:  # Curva para a esquerda e para baixo
+                    angle = 90
+                elif prev_pos[1] < pos[1] and next_pos[0] < pos[0]:  # Curva para cima e para a esquerda
+                    angle = 270
+                elif prev_pos[0] < pos[0] and next_pos[1] < pos[1]:  # Curva para a direita e para cima
+                    angle = 270
+                elif prev_pos[1] > pos[1] and next_pos[0] < pos[0]:  # Curva para cima e para a esquerda
+                    angle = 0
+                elif prev_pos[0] > pos[0] and next_pos[1] < pos[1]:  # Curva para a esquerda e para cima
+                    angle = 180
+                
+                dis.blit(pygame.transform.rotate(curva_cobra, angle), pos)
+            else:
+                # Movimento reto (horizontal ou vertical)
+                if prev_pos[0] == next_pos[0]:  # Movimento Vertical
+                    if prev_pos[1] < next_pos[1]:
+                        angle = 270  # Direção para baixo
+                    else:
+                        angle = 90  # Direção para cima
+                elif prev_pos[1] == next_pos[1]:  # Movimento Horizontal
+                    if prev_pos[0] < next_pos[0]:
+                        angle = 0  # Direção para a direita
+                    else:
+                        angle = 180  # Direção para a esquerda
+
+                dis.blit(pygame.transform.rotate(corpo_cobra, angle), pos)
 
 
-def get_curva_direction(prev_vector, current_vector):
-    """Retorna a rotação correta para o sprite da curva com base em vetores."""
-    if prev_vector == (1, 0) and current_vector == (0, -1):
-        return 0
-    elif prev_vector == (0, -1) and current_vector == (-1, 0):
-        return 90
-    elif prev_vector == (-1, 0) and current_vector == (0, 1):
-        return 180
-    elif prev_vector == (0, 1) and current_vector == (1, 0):
-        return 270
-    # Adicione outros casos aqui
-    return 0
-
-# Função para determinar a direção do segmento
-def get_segment_direction(current, next_segment):
-    """ Retorna a direção do movimento baseado em dois segmentos consecutivos """
-    if next_segment[0] > current[0]:  # Movendo para a direita
-        return 0
-    elif next_segment[0] < current[0]:  # Movendo para a esquerda
-        return 180
-    elif next_segment[1] > current[1]:  # Movendo para baixo
-        return 90
-    elif next_segment[1] < current[1]:  # Movendo para cima
-        return 270
-    return 0  # Caso padrão
-
-# Função para rotacionar imagens
-def rotate_image(image, direction):
-    if direction == 90:
-        return pygame.transform.rotate(image, 90)
-    elif direction == 270:
-        return pygame.transform.rotate(image, -90)
-    elif direction == 0:
-        return image
-    elif direction == 180:
-        return pygame.transform.rotate(image, 180)
-    return image
 
 # Função principal do jogo
 def gameLoop():
@@ -127,9 +115,9 @@ def gameLoop():
     y1 = dis_height // 2 + bar_height
 
     # Direção inicial
-    direction = "RIGHT"
     x1_change = snake_block
     y1_change = 0
+    direction = 0  # Ângulo da cabeça (0 = Direita, 90 = Cima, 180 = Esquerda, -90 = Baixo)
 
     # Criando a cobra com cabeça, corpo e rabo alinhados
     snake_list = [
@@ -143,13 +131,9 @@ def gameLoop():
     foodx = random.randrange(0, dis_width - snake_block, snake_block)
     foody = random.randrange(bar_height, dis_height - snake_block, snake_block)
 
-    # Tempo inicial
-    start_time = time.time()
-    fruits_collected = 0
     clock = pygame.time.Clock()
 
     while not game_over:
-
         while game_close:
             dis.fill(black)
             font_style = pygame.font.SysFont('bahnschrift', 35)
@@ -169,22 +153,22 @@ def gameLoop():
             if event.type == pygame.QUIT:
                 game_over = True
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_LEFT and direction != "RIGHT":
+                if event.key == pygame.K_LEFT and x1_change == 0:
                     x1_change = -snake_block
                     y1_change = 0
-                    direction = "LEFT"
-                elif event.key == pygame.K_RIGHT and direction != "LEFT":
+                    direction = 180
+                elif event.key == pygame.K_RIGHT and x1_change == 0:
                     x1_change = snake_block
                     y1_change = 0
-                    direction = "RIGHT"
-                elif event.key == pygame.K_UP and direction != "DOWN":
+                    direction = 0
+                elif event.key == pygame.K_UP and y1_change == 0:
                     y1_change = -snake_block
                     x1_change = 0
-                    direction = "UP"
-                elif event.key == pygame.K_DOWN and direction != "UP":
+                    direction = 90
+                elif event.key == pygame.K_DOWN and y1_change == 0:
                     y1_change = snake_block
                     x1_change = 0
-                    direction = "DOWN"
+                    direction = -90
 
         # Verifica se bateu na parede
         if x1 >= dis_width or x1 < 0 or y1 >= dis_height or y1 < bar_height:
@@ -206,7 +190,7 @@ def gameLoop():
         if (x1, y1) in snake_list[:-1]:
             game_close = True
 
-        # Desenha a cobra
+        # Desenha a cobra com rotação
         our_snake(snake_list, direction)
 
         pygame.display.update()
@@ -216,7 +200,6 @@ def gameLoop():
             foodx = random.randrange(0, dis_width - snake_block, snake_block)
             foody = random.randrange(bar_height, dis_height - snake_block, snake_block)
             length_of_snake += 1
-            fruits_collected += 1
 
         clock.tick(snake_speed)
 
