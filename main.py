@@ -44,13 +44,12 @@ try:
     corpo_cobra = pygame.image.load("img/corpo_cobra.png").convert_alpha()
     rabo_cobra = pygame.image.load("img/rabo_cobra.png").convert_alpha()
     curva_cobra = pygame.image.load("img/curva_cobra.png").convert_alpha()
-    fruta_img = pygame.image.load("img/fruta.png").convert_alpha()
+    fruta_img = pygame.image.load("img/morty.png").convert_alpha()
     rare_fruit_img = pygame.image.load("img/rare_fruit.png").convert_alpha()
     menu_background = pygame.image.load("img/menu_background.jpg").convert()
     gameover_background = pygame.image.load("img/menu_background.jpg").convert()
     original_button_image = pygame.image.load("img/espaco.jpg").convert_alpha()  # Imagem original do botão
     particle_image = pygame.image.load("img/particle.png").convert_alpha()  # Imagem para as partículas
-    blood_splatter = pygame.image.load("img/blood.png").convert_alpha()  # Splatter de sangue
     menu_logo = pygame.image.load("img/snake_logo.png").convert_alpha()  # Logo do jogo no menu
     speed_powerup_img = pygame.image.load("img/speed_powerup.png").convert_alpha() # Powerup de velocidade
     invincible_powerup_img = pygame.image.load("img/invincible_powerup.png").convert_alpha() # Powerup de invencibilidade
@@ -87,7 +86,6 @@ gameover_background = pygame.transform.scale(gameover_background, (dis_width, di
 original_button_image = pygame.transform.scale(original_button_image, (200, 70))
 button_image = round_image(original_button_image, 15)  # Imagem do botão com bordas arredondadas
 particle_image = pygame.transform.scale(particle_image, (10, 10))
-blood_splatter = pygame.transform.scale(blood_splatter, (snake_block * 2, snake_block * 2))
 
 # Calcula a altura proporcional para o logo
 logo_height = dis_height // 4
@@ -344,6 +342,7 @@ def gameLoop(selected_level):
 
     # Inicializa a velocidade da cobra
     current_snake_speed = snake_speed
+    original_snake_speed = snake_speed  # Salva a velocidade original
 
     # Power-ups
     powerups = []
@@ -354,7 +353,7 @@ def gameLoop(selected_level):
     speed_boost = False
     speed_timer = 0
     speed_duration = 3
-    speed_powerup_amount = 5 # Quanta velocidade o powerup aumenta
+    speed_powerup_amount = 5  # Quanta velocidade o powerup aumenta
 
     # Obstáculos
     obstacles = []
@@ -385,10 +384,11 @@ def gameLoop(selected_level):
 
     # Aumenta a dificuldade ao passar dos níveis
     def increase_difficulty():
-        nonlocal level, current_snake_speed, obstacle_count
+        nonlocal level, current_snake_speed, obstacle_count, original_snake_speed
         level += 1
         # Aumenta a velocidade gradualmente, mas não ultrapassa a velocidade máxima
-        current_snake_speed = min(current_snake_speed + 0.5, max_snake_speed)
+        original_snake_speed = min(original_snake_speed + 0.5, max_snake_speed)
+        current_snake_speed = original_snake_speed # Garante que a velocidade atual seja atualizada
         if enable_obstacles:
             obstacle_count += 1 # Adiciona mais obstáculos
 
@@ -567,7 +567,8 @@ def gameLoop(selected_level):
             # Cria as partículas na posição da fruta
             particles.extend(create_particles(foodx + snake_block // 2, foody + snake_block // 2, orange, 20))
             # Aumenta a velocidade da cobra (NORMAL)
-            current_snake_speed = min(current_snake_speed + snake_speed_increment, max_snake_speed)
+            original_snake_speed = min(original_snake_speed + snake_speed_increment, max_snake_speed)
+            current_snake_speed = original_snake_speed # Garante que a velocidade atual seja atualizada
 
             # Efeito de tremor na tela
             screen_shake(duration=0.05, magnitude=3)
@@ -605,11 +606,12 @@ def gameLoop(selected_level):
 
         # Gerenciamento do powerup de velocidade
         if speed_boost:
-            current_snake_speed = max_snake_speed + speed_powerup_amount  # Aplica o boost de velocidade
+            current_snake_speed = original_snake_speed + speed_powerup_amount # Aplica o boost de velocidade somando ao valor original
             if speed_timer > 0:
                 speed_timer -= delta_time
             else:
                 speed_boost = False
+                current_snake_speed = original_snake_speed # Retorna à velocidade original
 
         clock.tick(current_snake_speed)  # Usa a velocidade atualizada
 
@@ -620,10 +622,6 @@ def gameOver(score):
     game_over = True
     start_fade = False  # Começar o efeito de fade
     alpha = 255  # Nível de transparência inicial
-
-    # Desenha o splatter de sangue na tela
-    blood_x = random.randint(0, dis_width - snake_block * 2)
-    blood_y = random.randint(bar_height, dis_height - snake_block * 2)
 
     while game_over:
         for event in pygame.event.get():
@@ -637,7 +635,6 @@ def gameOver(score):
         # Renderiza o fundo do Game Over
         dis.blit(gameover_background, (0, 0))
         # Desenha o splatter de sangue
-        dis.blit(blood_splatter, (blood_x, blood_y))
 
         message("Game Over!", red, dis_width / 2, dis_height / 4, font_size=60, font='comicsansms')
         message(f"Sua Pontuação: {score}", gold, dis_width / 2, dis_height / 3, font_size=30)
