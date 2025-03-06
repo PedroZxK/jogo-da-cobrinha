@@ -294,6 +294,15 @@ def animate_item(scale, scale_change, min_scale, max_scale):
         scale_change *= -1
     return scale, scale_change
 
+# Função para criar um novo obstáculo
+def create_new_obstacle(snake_list, powerups, obstacles, rotten_apples, rare_fruits):
+    while True:
+        obsx = random.randrange(0, dis_width - snake_block, snake_block)
+        obsy = random.randrange(bar_height, dis_height - snake_block, snake_block)
+        if (obsx, obsy) not in snake_list and (obsx, obsy) not in powerups and (obsx, obsy) not in obstacles and (obsx, obsy) not in rotten_apples and (obsx, obsy) not in rare_fruits:
+            obstacles.append((obsx, obsy))
+            break
+
 def gameLoop(selected_level):
     game_over = False
     game_close = False
@@ -359,6 +368,9 @@ def gameLoop(selected_level):
     obstacles = []
     obstacle_count = 3 # Quantidade inicial de obstáculos
     obstacle_speed = 2
+    obstacle_spawn_rate = 7 # Define a chance de um novo obstáculo spawnar (1 em X)
+    last_obstacle_spawn = pygame.time.get_ticks()  # Guarda o tempo da última vez que um obstáculo foi gerado
+    obstacle_spawn_interval = 3000  # Intervalo entre cada spawn de obstáculo em milissegundos (3 segundos)
 
     # Comida venenosa
     rotten_apples = []
@@ -371,9 +383,7 @@ def gameLoop(selected_level):
     # Inicializa os obstáculos (Se o nível permitir)
     if enable_obstacles:
         for _ in range(obstacle_count):
-            obsx = random.randrange(0, dis_width - snake_block, snake_block)
-            obsy = random.randrange(bar_height, dis_height - snake_block, snake_block)
-            obstacles.append((obsx, obsy))
+            create_new_obstacle(snake_list, powerups, obstacles, rotten_apples, rare_fruits)
 
     # Variáveis de pontuação e tempo
     score = 0
@@ -466,6 +476,9 @@ def gameLoop(selected_level):
                         particles.extend(create_particles(obsx + snake_block // 2, obsy + snake_block // 2, gray, 20)) # Cria particulas
                         screen_shake(duration = 0.2, magnitude = 5)
                         score += 5
+                        # Gera 2 novos obstáculos em direções aleatórias
+                        for _ in range(2):
+                            create_new_obstacle(snake_list, powerups, obstacles, rotten_apples, rare_fruits)
 
         if game_close:
             gameOver(score)
@@ -494,7 +507,7 @@ def gameLoop(selected_level):
         if enable_powerups:
             for i, (powerupx, powerupy, powerup_type) in enumerate(powerups):
                 powerup_scale, powerup_scale_change = animate_item(powerup_scale, powerup_scale_change, item_min_scale, item_max_scale)
-                
+
                 if powerup_type == "speed":
                    scaled_powerup = pygame.transform.scale(speed_powerup_img, (int(snake_block * powerup_scale), int(snake_block * powerup_scale)))
                    powerup_rect = scaled_powerup.get_rect(center=(powerupx + snake_block // 2, powerupy + snake_block // 2))
@@ -599,6 +612,12 @@ def gameLoop(selected_level):
                 if obsx > dis_width:
                     obsx = 0 - snake_block
                 obstacles[i] = (obsx, obsy)
+
+            # Gera um novo obstáculo aleatoriamente (SE O NÍVEL PERMITIR)
+            now = pygame.time.get_ticks()
+            if enable_obstacles and now - last_obstacle_spawn > obstacle_spawn_interval and random.randint(1, obstacle_spawn_rate) == 1:
+                create_new_obstacle(snake_list, powerups, obstacles, rotten_apples, rare_fruits)
+                last_obstacle_spawn = now # Atualiza o tempo do último spawn
 
         # Atualiza o tempo de invencibilidade
         if invincible_timer > 0:
