@@ -44,17 +44,17 @@ try:
     corpo_cobra = pygame.image.load("img/corpo_cobra.png").convert_alpha()
     rabo_cobra = pygame.image.load("img/rabo_cobra.png").convert_alpha()
     curva_cobra = pygame.image.load("img/curva_cobra.png").convert_alpha()
-    fruta_img = pygame.image.load("img/morty.png").convert_alpha()
-    rare_fruit_img = pygame.image.load("img/rare_fruit.png").convert_alpha()
+    fruta_img = pygame.image.load("img/fruta_normal.png").convert_alpha()
+    rare_fruit_img = pygame.image.load("img/fruta_dourada.png").convert_alpha()
     menu_background = pygame.image.load("img/menu_background.jpg").convert()
     gameover_background = pygame.image.load("img/menu_background.jpg").convert()
     original_button_image = pygame.image.load("img/espaco.jpg").convert_alpha()  # Imagem original do botão
     particle_image = pygame.image.load("img/particle.png").convert_alpha()  # Imagem para as partículas
     menu_logo = pygame.image.load("img/snake_logo.png").convert_alpha()  # Logo do jogo no menu
-    speed_powerup_img = pygame.image.load("img/speed_powerup.png").convert_alpha() # Powerup de velocidade
-    invincible_powerup_img = pygame.image.load("img/invincible_powerup.png").convert_alpha() # Powerup de invencibilidade
-    obstacle_img = pygame.image.load("img/obstacle.png").convert_alpha() # Imagem para os obstáculos
-    rotten_apple = pygame.image.load("img/rotten_apple.png").convert_alpha() # Comida venenosa
+    speed_powerup_img = pygame.image.load("img/dash.png").convert_alpha() # Powerup de velocidade
+    invincible_powerup_img = pygame.image.load("img/invencibilidade.png").convert_alpha() # Powerup de invencibilidade
+    obstacle_img = pygame.image.load("img/asteroide.png").convert_alpha() # Imagem para os obstáculos
+    rotten_apple = pygame.image.load("img/veneno.png").convert_alpha() # Comida venenosa
 
 except pygame.error as e:
     print(f"Erro ao carregar imagens: {e}")
@@ -730,7 +730,7 @@ def gameMenu():
             message(level3_description, white, desc_x, level3_y + desc_y_offset, 20, font='comicsansms')
 
             sair_y = level3_y + 180
-            sair_button = button("Sair", dis_width / 2 - 100, sair_y, 200, 70, pygame.quit) # Sair do menu
+            sair_button = button("Sair", dis_width / 2 - 100, sair_y, 200, 70, pygame.quit) # WSair do menu
 
         pygame.display.update()
 
