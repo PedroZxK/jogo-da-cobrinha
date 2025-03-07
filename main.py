@@ -2,42 +2,37 @@ import pygame
 import time
 import random
 
-# Inicialização do Pygame
 pygame.init()
 
-# Configurações da tela
 infoObject = pygame.display.Info()
 dis_width = infoObject.current_w
 dis_height = infoObject.current_h
-bar_height = 80  # Altura da barra superior (aumentei para o placar ficar mais estiloso)
+bar_height = 80
 
 dis = pygame.display.set_mode((dis_width, dis_height), pygame.FULLSCREEN)
 pygame.display.set_caption('Snake Game - Remastered')
 
-# Cores (Mais cores para estilização)
 white = (255, 255, 255)
 black = (0, 0, 0)
 red = (255, 0, 0)
 green = (0, 255, 0)
-dark_green = (0, 150, 0)  # Verde Escuro para botões
+dark_green = (0, 150, 0)
 gold = (255, 215, 0)
-light_blue = (173, 216, 230)  # Azul Claro
-dark_blue = (0, 0, 139)  # Azul Escuro
+light_blue = (173, 216, 230)
+dark_blue = (0, 0, 139)
 gray = (128, 128, 128)
-dark_gray = (80, 80, 80)  # Cinza Escuro
+dark_gray = (80, 80, 80)
 orange = (255, 165, 0)
 purple = (128, 0, 128)
-button_color = (60, 60, 60) # Cor de fundo do botão
-score_color = (70, 70, 70)  # Cor de fundo do placar
+button_color = (60, 60, 60)
+score_color = (70, 70, 70)
 
-# Tamanho do bloco da cobra e velocidade
 snake_block = 60
 initial_snake_length = 3
 snake_speed = 10
-snake_speed_increment = 0.2  # Diminuição do incremento de velocidade
-max_snake_speed = 30  # Velocidade máxima da cobra
+snake_speed_increment = 0.2
+max_snake_speed = 30
 
-# Carregamento de imagens (mais imagens para efeitos)
 try:
     fundo = pygame.image.load("img/fundo_cobra.png").convert()
     cabeca_cobra = pygame.image.load("img/cabeca_cobra.png").convert_alpha()
@@ -48,23 +43,22 @@ try:
     rare_fruit_img = pygame.image.load("img/fruta_dourada.png").convert_alpha()
     menu_background = pygame.image.load("img/menu_background.jpg").convert()
     gameover_background = pygame.image.load("img/menu_background.jpg").convert()
-    original_button_image = pygame.image.load("img/espaco.jpg").convert_alpha()  # Imagem original do botão
-    particle_image = pygame.image.load("img/particle.png").convert_alpha()  # Imagem para as partículas
-    menu_logo = pygame.image.load("img/snake_logo.png").convert_alpha()  # Logo do jogo no menu
-    speed_powerup_img = pygame.image.load("img/dash.png").convert_alpha() # Powerup de velocidade
-    invincible_powerup_img = pygame.image.load("img/invencibilidade.png").convert_alpha() # Powerup de invencibilidade
-    obstacle_img = pygame.image.load("img/asteroide.png").convert_alpha() # Imagem para os obstáculos
-    rotten_apple = pygame.image.load("img/veneno.png").convert_alpha() # Comida venenosa
+    original_button_image = pygame.image.load("img/espaco.jpg").convert_alpha()
+    particle_image = pygame.image.load("img/particle.png").convert_alpha()
+    menu_logo = pygame.image.load("img/snake_logo.png").convert_alpha()
+    speed_powerup_img = pygame.image.load("img/dash.png").convert_alpha()
+    invincible_powerup_img = pygame.image.load("img/invencibilidade.png").convert_alpha()
+    obstacle_img = pygame.image.load("img/asteroide.png").convert_alpha()
+    rotten_apple = pygame.image.load("img/veneno.png").convert_alpha()
 
 except pygame.error as e:
     print(f"Erro ao carregar imagens: {e}")
     pygame.quit()
     quit()
 
-# Função para criar uma versão arredondada da imagem do botão
 def round_image(image, radius):
     corner_mask = pygame.Surface((radius * 2, radius * 2), pygame.SRCALPHA)
-    pygame.draw.circle(corner_mask, (0, 0, 0, 0), (radius, radius), radius, radius) # correção aqui
+    pygame.draw.circle(corner_mask, (0, 0, 0, 0), (radius, radius), radius, radius)
     rect = image.get_rect()
     rounded_image = image.copy()
     rounded_image.blit(corner_mask, (0, 0))
@@ -73,7 +67,6 @@ def round_image(image, radius):
     rounded_image.blit(corner_mask, (rect.width - radius * 2, rect.height - radius * 2))
     return rounded_image
 
-# Redimensionamento das imagens
 fundo = pygame.transform.scale(fundo, (dis_width, dis_height))
 cabeca_cobra = pygame.transform.scale(cabeca_cobra, (snake_block, snake_block))
 corpo_cobra = pygame.transform.scale(corpo_cobra, (snake_block, snake_block))
@@ -84,26 +77,23 @@ rare_fruit_img = pygame.transform.scale(rare_fruit_img, (snake_block, snake_bloc
 menu_background = pygame.transform.scale(menu_background, (dis_width, dis_height))
 gameover_background = pygame.transform.scale(gameover_background, (dis_width, dis_height))
 original_button_image = pygame.transform.scale(original_button_image, (200, 70))
-button_image = round_image(original_button_image, 15)  # Imagem do botão com bordas arredondadas
+button_image = round_image(original_button_image, 15)
 particle_image = pygame.transform.scale(particle_image, (10, 10))
 
-# Calcula a altura proporcional para o logo
 logo_height = dis_height // 4
-# Mantém a proporção original da imagem, calculando a largura com base na altura desejada
 logo_width = int(menu_logo.get_width() * (logo_height / menu_logo.get_height()))
-menu_logo = pygame.transform.scale(menu_logo, (logo_width, logo_height)) # Logo do jogo no menu
+menu_logo = pygame.transform.scale(menu_logo, (logo_width, logo_height))
 
 speed_powerup_img = pygame.transform.scale(speed_powerup_img, (snake_block, snake_block))
 invincible_powerup_img = pygame.transform.scale(invincible_powerup_img, (snake_block, snake_block))
 obstacle_img = pygame.transform.scale(obstacle_img, (snake_block, snake_block))
 rotten_apple = pygame.transform.scale(rotten_apple, (snake_block, snake_block))
 
-# Função para desenhar a cobra com rotação correta
 def our_snake(snake_list, direction):
     for i, pos in enumerate(snake_list):
-        if i == len(snake_list) - 1:  # Cabeça
+        if i == len(snake_list) - 1:
             dis.blit(pygame.transform.rotate(cabeca_cobra, direction), pos)
-        elif i == 0:  # Rabo
+        elif i == 0:
             next_pos = snake_list[i + 1]
             if next_pos[0] > pos[0]:
                 angle = 0
@@ -114,7 +104,7 @@ def our_snake(snake_list, direction):
             else:
                 angle = 90
             dis.blit(pygame.transform.rotate(rabo_cobra, angle), pos)
-        else:  # Corpo
+        else:
             prev_pos = snake_list[i - 1]
             next_pos = snake_list[i + 1]
 
@@ -151,30 +141,26 @@ def our_snake(snake_list, direction):
 
                 dis.blit(pygame.transform.rotate(corpo_cobra, angle), pos)
 
-# Inicializa o mixer de áudio
 pygame.mixer.init()
 
-# Carrega os sons
 pygame.mixer.music.load("gameplay_musica.mp3")
 death_sound = pygame.mixer.Sound("glitch_7.mp3")
 point_sound = pygame.mixer.Sound("pontos.mp3")
 menu_music = pygame.mixer.Sound("ambiente-menu.mp3")
 menu_button_sound = pygame.mixer.Sound("menu-botoes.mp3")
-eat_sound = pygame.mixer.Sound("pop.mp3")  # Adiciona som ao comer
+eat_sound = pygame.mixer.Sound("pop.mp3")
 powerup_sound = pygame.mixer.Sound("powerup.mp3")
 obstacle_hit_sound = pygame.mixer.Sound("obstacle_hit.mp3")
 
-# Configurações de volume
 pygame.mixer.music.set_volume(0.5)
 death_sound.set_volume(0.7)
 point_sound.set_volume(0.7)
 menu_music = pygame.mixer.Sound("ambiente-menu.mp3")
 menu_button_sound = pygame.mixer.Sound("menu-botoes.mp3")
-eat_sound = pygame.mixer.Sound("pop.mp3")  # Adiciona som ao comer
+eat_sound = pygame.mixer.Sound("pop.mp3")
 powerup_sound = pygame.mixer.Sound("powerup.mp3")
 obstacle_hit_sound = pygame.mixer.Sound("obstacle_hit.mp3")
 
-# Configurações de volume
 pygame.mixer.music.set_volume(0.5)
 death_sound.set_volume(0.7)
 point_sound.set_volume(0.7)
@@ -184,7 +170,6 @@ eat_sound.set_volume(0.7)
 powerup_sound.set_volume(0.7)
 obstacle_hit_sound.set_volume(0.7)
 
-# Função para gerar a comida em uma posição válida
 def generate_food(snake_list, powerups, obstacles, rotten_apples, rare_fruits):
     while True:
         foodx = random.randrange(0, dis_width - snake_block, snake_block)
@@ -192,40 +177,33 @@ def generate_food(snake_list, powerups, obstacles, rotten_apples, rare_fruits):
         if (foodx, foody) not in snake_list and (foodx, foody) not in powerups and (foodx, foody) not in obstacles and (foodx,foody) not in rotten_apples and (foodx, foody) not in rare_fruits:
             return foodx, foody
 
-# Função para desenhar texto na tela
 def message(msg, color, x, y, font_size=35, font='bahnschrift'):
     font_style = pygame.font.SysFont(font, font_size)
     msg_surface = font_style.render(msg, True, color)
     msg_rect = msg_surface.get_rect(center=(x, y))
     dis.blit(msg_surface, msg_rect)
 
-# Função para desenhar um botão
-def button(msg, x, y, w, h, action=None, parameter=None):  # Adicionando um parametro para a função do botão
+def button(msg, x, y, w, h, action=None, parameter=None):
     mouse = pygame.mouse.get_pos()
     click = pygame.mouse.get_pressed()
     rect = pygame.Rect(x, y, w, h)
 
-    # Animação ao passar o mouse
     if rect.collidepoint(mouse):
-        # Escurece um pouco o botão
         darkened_button = button_image.copy()
-        darkened_button.fill((0, 0, 0, 50), special_flags=pygame.BLEND_RGBA_SUB) # Adiciona uma camada preta semi-transparente
+        darkened_button.fill((0, 0, 0, 50), special_flags=pygame.BLEND_RGBA_SUB)
         dis.blit(darkened_button, (x, y))
-        # Adiciona um contorno ao botão
-        pygame.draw.rect(dis, gold, rect, 3, border_radius=15) # Adicionando bordas arredondadas
+        pygame.draw.rect(dis, gold, rect, 3, border_radius=15)
         if click[0] == 1 and action is not None:
             menu_button_sound.play()
             if parameter is not None:
-                action(parameter)  # Passa o parâmetro se existir
+                action(parameter)
             else:
                 action()
     else:
-        # Desenha a imagem de fundo do botão
         dis.blit(button_image, (x, y))
 
     message(msg, white, x + w / 2, y + h / 2, 25)
 
-# Função para criar partículas
 def create_particles(x, y, color, num_particles):
     particles = []
     for _ in range(num_particles):
@@ -241,12 +219,10 @@ def create_particles(x, y, color, num_particles):
         particles.append(particle)
     return particles
 
-# Função para desenhar as partículas
 def draw_particles(particles):
     for particle in particles:
         pygame.draw.circle(dis, particle['color'], (int(particle['x']), int(particle['y'])), particle['size'])
 
-# Função para atualizar as partículas
 def update_particles(particles):
     for particle in particles[:]:
         particle['x'] += particle['speed_x']
@@ -255,46 +231,39 @@ def update_particles(particles):
         if particle['life'] <= 0:
             particles.remove(particle)
 
-# Função para desenhar uma barra superior com a pontuação e a velocidade
 def draw_top_bar(score, speed, invincible_timer, level, speed_timer, selected_level):
-    pygame.draw.rect(dis, score_color, (0, 0, dis_width, bar_height))  # Fundo da barra
-    pygame.draw.rect(dis, black, (0, 0, dis_width, bar_height), 2)  # Borda da barra
-    message(f"Pontuação: {score}", white, dis_width / 6, bar_height / 2, 25)  # Pontuação
-    message(f"Velocidade: {round(speed, 2)}", white, 2 * dis_width / 6, bar_height / 2, 25)  # Velocidade
-    # message(f"Nível: {level}", white, 3 * dis_width / 6, bar_height / 2, 25)  # Nível
-    message(f"Fase: {selected_level}", white, 3 * dis_width / 6, bar_height / 2, 25)  # Fase atual
+    pygame.draw.rect(dis, score_color, (0, 0, dis_width, bar_height))
+    pygame.draw.rect(dis, black, (0, 0, dis_width, bar_height), 2)
+    message(f"Pontuação: {score}", white, dis_width / 6, bar_height / 2, 25)
+    message(f"Velocidade: {round(speed, 2)}", white, 2 * dis_width / 6, bar_height / 2, 25)
+    message(f"Fase: {selected_level}", white, 3 * dis_width / 6, bar_height / 2, 25)
     if invincible_timer > 0:
-        message(f"Invencível: {round(invincible_timer, 1)}", light_blue, 5 * dis_width / 6, bar_height / 2, 25)  # Invencibilidade
+        message(f"Invencível: {round(invincible_timer, 1)}", light_blue, 5 * dis_width / 6, bar_height / 2, 25)
     if speed_timer > 0:
         message(f"Velocidade Acelerada: {round(speed_timer, 1)}", orange, 4 * dis_width / 6, bar_height / 2, 25)
 
-# Função para exibir um efeito de tremor na tela
 def screen_shake(duration=0.1, magnitude=5):
     shake_surface = pygame.Surface((dis_width, dis_height), pygame.SRCALPHA)
-    shake_surface.blit(dis, (0, 0))  # Copia a tela atual para a superfície de tremor
+    shake_surface.blit(dis, (0, 0))
 
     start_time = time.time()
     while time.time() - start_time < duration:
         x_offset = random.randint(-magnitude, magnitude)
         y_offset = random.randint(-magnitude, magnitude)
 
-        # Limpa a tela principal
-        dis.blit(fundo, (0, 0))  # Redesenha o fundo
+        dis.blit(fundo, (0, 0))
 
-        # Desenha a superfície de tremor com os offsets
         dis.blit(shake_surface, (x_offset, y_offset))
 
-        pygame.time.delay(5)  # Pequeno delay para visualização
+        pygame.time.delay(5)
         pygame.display.update()
 
-# Função para adicionar animação de pulso
 def animate_item(scale, scale_change, min_scale, max_scale):
     scale += scale_change
     if scale > max_scale or scale < min_scale:
         scale_change *= -1
     return scale, scale_change
 
-# Função para criar um novo obstáculo
 def create_new_obstacle(snake_list, powerups, obstacles, rotten_apples, rare_fruits):
     while True:
         obsx = random.randrange(0, dis_width - snake_block, snake_block)
@@ -324,7 +293,6 @@ def gameLoop(selected_level):
     ]
     length_of_snake = len(snake_list)
 
-    # Definição das opções com base no nível selecionado
     enable_powerups = selected_level > 1
     enable_obstacles = selected_level > 2
 
@@ -346,65 +314,54 @@ def gameLoop(selected_level):
     item_max_scale = 1.1
     item_min_scale = 0.9
 
-    # Lista para armazenar as partículas
     particles = []
 
-    # Inicializa a velocidade da cobra
     current_snake_speed = snake_speed
-    original_snake_speed = snake_speed  # Salva a velocidade original
+    original_snake_speed = snake_speed
 
-    # Power-ups
     powerups = []
-    powerup_spawn_rate = 5  # Chance de 1 em X de um power-up spawnar (aumentei a frequência)
+    powerup_spawn_rate = 5
     invincible = False
     invincible_timer = 0
-    invincible_duration = 5 # segundos
+    invincible_duration = 5
     speed_boost = False
     speed_timer = 0
     speed_duration = 3
-    speed_powerup_amount = 5  # Quanta velocidade o powerup aumenta
+    speed_powerup_amount = 5
 
-    # Obstáculos
     obstacles = []
-    obstacle_count = 3 # Quantidade inicial de obstáculos
+    obstacle_count = 3
     obstacle_speed = 2
-    obstacle_spawn_rate = 7 # Define a chance de um novo obstáculo spawnar (1 em X)
-    last_obstacle_spawn = pygame.time.get_ticks()  # Guarda o tempo da última vez que um obstáculo foi gerado
-    obstacle_spawn_interval = 3000  # Intervalo entre cada spawn de obstáculo em milissegundos (3 segundos)
+    obstacle_spawn_rate = 7
+    last_obstacle_spawn = pygame.time.get_ticks()
+    obstacle_spawn_interval = 3000
 
-    # Comida venenosa
     rotten_apples = []
-    rotten_apple_spawn_rate = 6 # Chance de 1 em X de uma maça podre spawnar (aumentei a frequência)
+    rotten_apple_spawn_rate = 6
 
-    # Comida rara
     rare_fruits = []
-    rare_fruit_spawn_rate = 12 # Chance de 1 em X de uma fruta rara spawnar (aumentei a frequência)
+    rare_fruit_spawn_rate = 12
 
-    # Inicializa os obstáculos (Se o nível permitir)
     if enable_obstacles:
         for _ in range(obstacle_count):
             create_new_obstacle(snake_list, powerups, obstacles, rotten_apples, rare_fruits)
 
-    # Variáveis de pontuação e tempo
     score = 0
     game_time = 0
     level = 1
 
-    last_frame_time = time.time() # Tempo do último frame
+    last_frame_time = time.time()
 
-    # Aumenta a dificuldade ao passar dos níveis
     def increase_difficulty():
         nonlocal level, current_snake_speed, obstacle_count, original_snake_speed
         level += 1
-        # Aumenta a velocidade gradualmente, mas não ultrapassa a velocidade máxima
         original_snake_speed = min(original_snake_speed + 0.5, max_snake_speed)
-        current_snake_speed = original_snake_speed # Garante que a velocidade atual seja atualizada
+        current_snake_speed = original_snake_speed
         if enable_obstacles:
-            obstacle_count += 1 # Adiciona mais obstáculos
+            obstacle_count += 1
 
     while not game_over:
 
-        # Calcula o tempo decorrido desde o último frame
         current_time = time.time()
         delta_time = current_time - last_frame_time
         last_frame_time = current_time
@@ -430,7 +387,6 @@ def gameLoop(selected_level):
                     x1_change = 0
                     direction = -90
 
-        # Antes de atualizar a posição da cobra, verifique a colisão
         if (
             x1 >= dis_width
             or x1 < 0
@@ -440,15 +396,14 @@ def gameLoop(selected_level):
         ):
             if not invincible:
                 pygame.mixer.music.stop()
-                death_sound.play()  # Toca o som NO MOMENTO DA COLISÃO
-                game_over = True  # Define game_over como True
-                game_close = True  # Define game_close como True
-                gameOver(score) # Chamando o game over aqui
-                break # Sai do loop
+                death_sound.play()
+                game_over = True
+                game_close = True
+                gameOver(score)
+                break
             else:
                 screen_shake(duration = 0.3, magnitude = 7)
-                obstacles = [] # Destrói todos os obstaculos ao colidir invencível
-                # Reposiciona a cobra para não ficar presa
+                obstacles = []
                 x1 = dis_width // 2
                 y1 = dis_height // 2 + bar_height
                 snake_list = [
@@ -457,8 +412,7 @@ def gameLoop(selected_level):
                     (x1, y1)
                 ]
                 length_of_snake = len(snake_list)
-                invincible = False
-                invincible_timer = 0
+                pass
 
         if enable_obstacles:
             for obsx, obsy in obstacles:
@@ -468,15 +422,14 @@ def gameLoop(selected_level):
                         death_sound.play()
                         game_close = True
                         game_over = True
-                        gameOver(score) # Chamando o game over aqui
+                        gameOver(score)
                         break
                     else:
                         obstacle_hit_sound.play()
-                        obstacles.remove((obsx, obsy)) # Remove o obstáculo
-                        particles.extend(create_particles(obsx + snake_block // 2, obsy + snake_block // 2, gray, 20)) # Cria particulas
+                        obstacles.remove((obsx, obsy))
+                        particles.extend(create_particles(obsx + snake_block // 2, obsy + snake_block // 2, gray, 20))
                         screen_shake(duration = 0.2, magnitude = 5)
                         score += 5
-                        # Gera 2 novos obstáculos em direções aleatórias
                         for _ in range(2):
                             create_new_obstacle(snake_list, powerups, obstacles, rotten_apples, rare_fruits)
 
@@ -487,7 +440,6 @@ def gameLoop(selected_level):
         y1 += y1_change
         dis.blit(fundo, (0, 0))
 
-        # Animação da fruta principal
         fruit_scale, fruit_scale_change = animate_item(fruit_scale, fruit_scale_change, item_min_scale, item_max_scale)
         scaled_fruta = pygame.transform.scale(fruta_img, (int(snake_block * fruit_scale), int(snake_block * fruit_scale)))
         fruta_rect = scaled_fruta.get_rect(center=(foodx + snake_block // 2, foody + snake_block // 2))
@@ -499,11 +451,9 @@ def gameLoop(selected_level):
 
         our_snake(snake_list, direction)
 
-        # Desenha e atualiza as partículas
         draw_particles(particles)
         update_particles(particles)
 
-        # Powerups (se o nível permitir)
         if enable_powerups:
             for i, (powerupx, powerupy, powerup_type) in enumerate(powerups):
                 powerup_scale, powerup_scale_change = animate_item(powerup_scale, powerup_scale_change, item_min_scale, item_max_scale)
@@ -529,7 +479,6 @@ def gameLoop(selected_level):
                         invincible = True
                         invincible_timer = invincible_duration
 
-        #Obstaculos (se o nível permitir)
         if enable_obstacles:
             for i, (obsx, obsy) in enumerate(obstacles):
                 obstacle_scale, obstacle_scale_change = animate_item(obstacle_scale, obstacle_scale_change, item_min_scale, item_max_scale)
@@ -537,7 +486,6 @@ def gameLoop(selected_level):
                 obstacle_rect = scaled_obstacle.get_rect(center=(obsx + snake_block // 2, obsy + snake_block // 2))
                 dis.blit(scaled_obstacle, obstacle_rect)
 
-        # Comida Venenosa (sempre presente)
         for i, (rottenx, rotteny) in enumerate(rotten_apples):
             rotten_scale, rotten_scale_change = animate_item(rotten_scale, rotten_scale_change, item_min_scale, item_max_scale)
             scaled_rotten = pygame.transform.scale(rotten_apple, (int(snake_block * rotten_scale), int(snake_block * rotten_scale)))
@@ -546,13 +494,12 @@ def gameLoop(selected_level):
 
             if abs(x1 - rottenx) < snake_block and abs(y1 - rotteny) < snake_block:
                 rotten_apples.pop(i)
-                score = max(0, score - 1)  # Diminui a pontuação em 1, mas não deixa ser negativa
+                score = max(0, score - 1) 
                 particles.extend(create_particles(x1, y1, dark_green, 20))
                 screen_shake(duration = 0.1, magnitude = 4)
                 if length_of_snake > initial_snake_length:
                     length_of_snake -= 1
 
-        # Comida Rara (sempre presente)
         for i, (rarex, rarey) in enumerate(rare_fruits):
             rare_fruit_scale, rare_fruit_scale_change = animate_item(rare_fruit_scale, rare_fruit_scale_change, item_min_scale, item_max_scale)
             scaled_rare = pygame.transform.scale(rare_fruit_img, (int(snake_block * rare_fruit_scale), int(snake_block * rare_fruit_scale)))
@@ -561,51 +508,42 @@ def gameLoop(selected_level):
 
             if abs(x1 - rarex) < snake_block and abs(y1 - rarey) < snake_block:
                 rare_fruits.pop(i)
-                length_of_snake += 2  # Aumenta o tamanho da cobra
-                score += 5  # Adiciona à pontuação
-                particles.extend(create_particles(rarex + snake_block // 2, rarey + snake_block // 2, gold, 30))  # Cria partículas
-                screen_shake(duration=0.1, magnitude=4) # Tremor na tela
+                length_of_snake += 2
+                score += 5
+                particles.extend(create_particles(rarex + snake_block // 2, rarey + snake_block // 2, gold, 30))
+                screen_shake(duration=0.1, magnitude=4)
 
-        # Desenha a barra superior
         draw_top_bar(score, current_snake_speed, invincible_timer, level, speed_timer, selected_level)
 
         pygame.display.update()
 
-        # Verifica se comeu a fruta
         if abs(x1 - foodx) < snake_block and abs(y1 - foody) < snake_block:
             foodx, foody = generate_food(snake_list, powerups, obstacles, rotten_apples, rare_fruits)
             length_of_snake += 1
             score += 1
-            eat_sound.play()  # Som ao comer
-            # Cria as partículas na posição da fruta
+            eat_sound.play()
             particles.extend(create_particles(foodx + snake_block // 2, foody + snake_block // 2, orange, 20))
-            # Aumenta a velocidade da cobra (NORMAL)
             original_snake_speed = min(original_snake_speed + snake_speed_increment, max_snake_speed)
-            current_snake_speed = original_snake_speed # Garante que a velocidade atual seja atualizada
+            current_snake_speed = original_snake_speed
 
-            # Efeito de tremor na tela
             screen_shake(duration=0.05, magnitude=3)
 
-            # Chance de gerar um powerup (se o nível permitir)
-            if enable_powerups and random.randint(1, 3) == 1: # Aumenta a frequência dos powerups
+            if enable_powerups and random.randint(1, 3) == 1:
                 powerupx = random.randrange(0, dis_width - snake_block, snake_block)
                 powerupy = random.randrange(bar_height, dis_height - snake_block, snake_block)
                 powerup_type = random.choice(["speed", "invincible"])
                 powerups.append((powerupx, powerupy, powerup_type))
 
-            # Chance de gerar uma maça podre (sempre presente)
             if random.randint(1, rotten_apple_spawn_rate) == 1:
                 rottenx = random.randrange(0, dis_width - snake_block, snake_block)
                 rotteny = random.randrange(bar_height, dis_height - snake_block, snake_block)
                 rotten_apples.append((rottenx, rotteny))
 
-             # Chance de gerar uma fruta rara (sempre presente)
             if random.randint(1, rare_fruit_spawn_rate) == 1:
                 rarex = random.randrange(0, dis_width - snake_block, snake_block)
                 rarey = random.randrange(bar_height, dis_height - snake_block, snake_block)
                 rare_fruits.append((rarex, rarey))
 
-        #Atualiza os obstáculos (se o nível permitir)
         if enable_obstacles:
             for i, (obsx, obsy) in enumerate(obstacles):
                 obsx += obstacle_speed
@@ -613,34 +551,33 @@ def gameLoop(selected_level):
                     obsx = 0 - snake_block
                 obstacles[i] = (obsx, obsy)
 
-            # Gera um novo obstáculo aleatoriamente (SE O NÍVEL PERMITIR)
             now = pygame.time.get_ticks()
             if enable_obstacles and now - last_obstacle_spawn > obstacle_spawn_interval and random.randint(1, obstacle_spawn_rate) == 1:
                 create_new_obstacle(snake_list, powerups, obstacles, rotten_apples, rare_fruits)
-                last_obstacle_spawn = now # Atualiza o tempo do último spawn
+                last_obstacle_spawn = now
 
-        # Atualiza o tempo de invencibilidade
         if invincible_timer > 0:
             invincible_timer -= delta_time
+            if invincible_timer <= 0:
+                invincible = False
 
-        # Gerenciamento do powerup de velocidade
         if speed_boost:
-            current_snake_speed = original_snake_speed + speed_powerup_amount # Aplica o boost de velocidade somando ao valor original
+            current_snake_speed = original_snake_speed + speed_powerup_amount
             if speed_timer > 0:
                 speed_timer -= delta_time
             else:
                 speed_boost = False
-                current_snake_speed = original_snake_speed # Retorna à velocidade original
+                current_snake_speed = original_snake_speed
 
-        clock.tick(current_snake_speed)  # Usa a velocidade atualizada
+        clock.tick(current_snake_speed)
 
     pygame.quit()
     quit()
 
 def gameOver(score):
     game_over = True
-    start_fade = False  # Começar o efeito de fade
-    alpha = 255  # Nível de transparência inicial
+    start_fade = False
+    alpha = 255
 
     while game_over:
         for event in pygame.event.get():
@@ -649,16 +586,13 @@ def gameOver(score):
                 quit()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
-                    start_fade = True  # Inicia o efeito de fade
+                    start_fade = True
 
-        # Renderiza o fundo do Game Over
         dis.blit(gameover_background, (0, 0))
-        # Desenha o splatter de sangue
 
         message("Game Over!", red, dis_width / 2, dis_height / 4, font_size=60, font='comicsansms')
         message(f"Sua Pontuação: {score}", gold, dis_width / 2, dis_height / 3, font_size=30)
 
-        # Desenha os botões
         button("Reiniciar", dis_width / 4 - 100, dis_height / 2, 200, 70, lambda: gameLoop(level_selected))
         button("Menu", dis_width / 2 - 100, dis_height / 2, 200, 70, gameMenu)
         button("Sair", 3 * dis_width / 4 - 100, dis_height / 2, 200, 70, pygame.quit)
@@ -667,18 +601,16 @@ def gameOver(score):
 
 def gameMenu():
     menu = True
-    menu_music.play(-1)  # Toca a música do menu em loop
+    menu_music.play(-1)
     pygame.mixer.music.stop()
 
-    # Variável para controlar a animação do logo
-    logo_y = -menu_logo.get_height()  # Inicia fora da tela
-    logo_speed = 2  # Velocidade da animação do logo
+    logo_y = -menu_logo.get_height()
+    logo_speed = 2
 
-    # Variáveis para animação dos botões
-    button1_x = -200  # Inicia fora da tela à esquerda
-    button2_x = dis_width + 200  # Inicia fora da tela à direita
-    button_speed = 5  # Velocidade da animação dos botões
-    buttons_animated = False  # Flag para verificar se os botões foram animados
+    button1_x = -200
+    button2_x = dis_width + 200
+    button_speed = 5
+    buttons_animated = False
 
     while menu:
         for event in pygame.event.get():
@@ -686,55 +618,45 @@ def gameMenu():
                 pygame.quit()
                 quit()
 
-        dis.blit(menu_background, (0, 0))  # Desenha o fundo do menu
+        dis.blit(menu_background, (0, 0))
 
-        # Animação do logo
         if logo_y < dis_height / 4 - menu_logo.get_height() / 2:
             logo_y += logo_speed
         else:
-            # Centraliza o logo quando ele atinge a posição final
             logo_y = dis_height / 4 - menu_logo.get_height() / 2
 
-            # Inicia a animação dos botões quando o logo estiver no lugar
             if not buttons_animated:
-                button1_x = dis_width / 2 - 100  # Centraliza o botão 1
-                button2_x = dis_width / 2 - 100  # Centraliza o botão 2
+                button1_x = dis_width / 2 - 100
+                button2_x = dis_width / 2 - 100
                 buttons_animated = True
 
-        # Desenha o logo na tela
         dis.blit(menu_logo, (dis_width / 2 - menu_logo.get_width() / 2, logo_y))
 
-        # Definições dos níveis
         level1_description = "Cobra Clássica: Apenas frutas e a cobra."
         level2_description = "Poderes Ativados: Power-ups e frutas raras."
         level3_description = "Desafio Completo: Tudo + obstáculos!"
 
-        # Calcula as posições para centralizar as descrições
         desc_x = dis_width / 2
         level_button_y_start = dis_height / 3 + 50
-        desc_y_offset = 90 # espaço entre o botão e a descrição
+        desc_y_offset = 90
 
-        # Desenha os botões e suas descrições
         if buttons_animated:
             level1_button = button("Nível 1", dis_width / 2 - 100, level_button_y_start, 200, 70, lambda: set_level(1))
             message(level1_description, white, desc_x, level_button_y_start + desc_y_offset, 20, font='comicsansms')
 
-            # Nível 2: Poderes Ativados
-            level2_y = level_button_y_start + 180 # Espaçamento entre os botões
+            level2_y = level_button_y_start + 180
             level2_button = button("Nível 2", dis_width / 2 - 100, level2_y, 200, 70, lambda: set_level(2))
             message(level2_description, white, desc_x, level2_y + desc_y_offset, 20, font='comicsansms')
 
-            # Nível 3: Desafio Completo
-            level3_y = level2_y + 180 # Espaçamento entre os botões
+            level3_y = level2_y + 180
             level3_button = button("Nível 3", dis_width / 2 - 100, level3_y, 200, 70, lambda: set_level(3))
             message(level3_description, white, desc_x, level3_y + desc_y_offset, 20, font='comicsansms')
 
             sair_y = level3_y + 180
-            sair_button = button("Sair", dis_width / 2 - 100, sair_y, 200, 70, pygame.quit) # WSair do menu
+            sair_button = button("Sair", dis_width / 2 - 100, sair_y, 200, 70, pygame.quit)
 
         pygame.display.update()
 
-# Definindo o nível inicial
 level_selected = 1
 
 def set_level(level):
@@ -742,5 +664,4 @@ def set_level(level):
     level_selected = level
     gameLoop(level_selected)
 
-# Inicializa o jogo
 gameMenu()
