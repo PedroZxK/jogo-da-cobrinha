@@ -45,11 +45,13 @@ try:
     gameover_background = pygame.image.load("img/menu_background.jpg").convert()
     original_button_image = pygame.image.load("img/espaco.jpg").convert_alpha()
     particle_image = pygame.image.load("img/particle.png").convert_alpha()
-    menu_logo = pygame.image.load("img/snake_logo.png").convert_alpha()
+    menu_logo = pygame.image.load("img/logo.png").convert_alpha()
     speed_powerup_img = pygame.image.load("img/dash.png").convert_alpha()
     invincible_powerup_img = pygame.image.load("img/invencibilidade.png").convert_alpha()
     obstacle_img = pygame.image.load("img/asteroide.png").convert_alpha()
     rotten_apple = pygame.image.load("img/veneno.png").convert_alpha()
+    game_over_img = pygame.image.load("img/game_over.png").convert_alpha() # Carrega a imagem de Game Over
+
 
 except pygame.error as e:
     print(f"Erro ao carregar imagens: {e}")
@@ -88,6 +90,7 @@ speed_powerup_img = pygame.transform.scale(speed_powerup_img, (snake_block, snak
 invincible_powerup_img = pygame.transform.scale(invincible_powerup_img, (snake_block, snake_block))
 obstacle_img = pygame.transform.scale(obstacle_img, (snake_block, snake_block))
 rotten_apple = pygame.transform.scale(rotten_apple, (snake_block, snake_block))
+game_over_img = pygame.transform.scale(game_over_img, (dis_width // 2, dis_height // 5))  # Escala a imagem do game over
 
 def our_snake(snake_list, direction):
     for i, pos in enumerate(snake_list):
@@ -571,8 +574,6 @@ def gameLoop(selected_level):
 
         clock.tick(current_snake_speed)
 
-    pygame.quit()
-    quit()
 
 def gameOver(score):
     game_over = True
@@ -590,7 +591,10 @@ def gameOver(score):
 
         dis.blit(gameover_background, (0, 0))
 
-        message("Game Over!", red, dis_width / 2, dis_height / 4, font_size=60, font='comicsansms')
+        # Use a imagem game_over_img em vez da mensagem de texto
+        game_over_rect = game_over_img.get_rect(center=(dis_width / 2, dis_height / 4))  # Posiciona a imagem
+        dis.blit(game_over_img, game_over_rect)
+
         message(f"Sua Pontuação: {score}", gold, dis_width / 2, dis_height / 3, font_size=30)
 
         button("Reiniciar", dis_width / 4 - 100, dis_height / 2, 200, 70, lambda: gameLoop(level_selected))
@@ -598,6 +602,7 @@ def gameOver(score):
         button("Sair", 3 * dis_width / 4 - 100, dis_height / 2, 200, 70, pygame.quit)
 
         pygame.display.update()
+
 
 def gameMenu():
     menu = True
